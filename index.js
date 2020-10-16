@@ -296,8 +296,9 @@ function setup() {
   gameInterval = setInterval(function(){
     gameTime--;
     if(gameTime <= 0){
+      gameState = "gameover";
       let totalCandies = player.candy.shittles + player.candy.gandgs + player.candy.himhes + player.candy.sugar + player.candy.lollipop;
-      dialogueBox("Game over!", function(){}, `You got `+ totalCandies + " candies total!")
+      dialogueBox("Game over!", function(){gameState = "gameover";}, `You got `+ totalCandies + " candies total!");
       clearInterval(gameInterval);
     }
   }, 1000);

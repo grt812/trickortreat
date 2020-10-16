@@ -50,10 +50,12 @@ canvas{
 
 #message{
   font-size: 50px;
+  user-select: none;
 }
 
 #subtext{
   font-size: 30px;
+  user-select: none;
 }
 
 button{
