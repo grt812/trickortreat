@@ -5,9 +5,12 @@
 
 // let bg = ;
 //Declares Variable
+
+let gameState = "walking";
+
 const mapWidth = 5000;
 const mapHeight = 5000;
-let player = {x: 0, y: 0, realX: 0, realY: 0, width: 200, height: 200, speed: 20, candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}};
+let player = {x: 0, y: 0, realX: 0, realY: 0, width: 200, height: 200, speed: 6, candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}};
 let map = {x: 1000, y: 500, realX: 0, realY: 0, width:mapWidth, height: mapHeight};
 let keys = {up: false, down: false, left: false, right: false};
 let horizontalBorders = [{x: 0, y1: 0, y2: map.height}, {x: map.width, y1: 0, y2: map.height}];
@@ -54,6 +57,23 @@ let gandgs;
 let shittles;
 let sugar;
 let himhes;
+
+//Mini games
+let apple;
+let bucket;
+let apples = [];
+let appleCountdown;
+let appleCountdownNum;
+let candies = [];
+let candyCountdown;
+let candyCountdownNum;
+let specialCandy;
+let candy1;
+let candy2;
+let candy3;
+let candy4;
+let candy5;
+let bowl;
 
 // intervals for walking animation
 let animationIntervalLeft;
@@ -106,6 +126,17 @@ function setup() {
   jackolantern1 = loadImage('sprites/jackolantern1.png');
   jackolantern2 = loadImage('sprites/jackolantern2.png');
   jackolantern3 = loadImage('sprites/jackolantern3.png');
+
+  apple = loadImage('sprites/apple.png');
+  bucket = loadImage('sprites/bucket.png');
+  candy1 = loadImage('sprites/candy1.png');
+  candy2 = loadImage('sprites/candy2.png');
+  candy3 = loadImage('sprites/candy3.png');
+  candy4 = loadImage('sprites/candy4.png');
+  candy5 = loadImage('sprites/candy5.png');
+  rainbowcandy = loadImage('sprites/rainbowcandy.png');
+  bowl = loadImage('sprites/bowl.png');
+
 
   //Check if image exists
   let houseNumber = 1;
@@ -212,6 +243,7 @@ function setup() {
   //
 
   // console.log(houses[0].width);
+  candyHand();
 
 }
 
@@ -308,7 +340,13 @@ function checkHouseRange(){
         houseInRange = true;
         if(enterPressed){
           e.visited = true;
-          giveRandomCandy();
+          let trickOrTreat = Math.floor(Math.random() * 10);
+          if(trickOrTreat >= 8){
+            giveRandomCandy();
+          } else {
+            alert("Trick!");
+            randomMiniGame();
+          }
         }
       }
   });
@@ -317,26 +355,174 @@ function checkHouseRange(){
 }
 
 function giveRandomCandy(){
-  let choice = Math.floor(Math.random() * 5);
+  let choice = Math.floor(Math.random() * 10);
   //candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}
-  switch(choice){
+  if(choice < 3){
+    player.candy.shittles++;
+  } else if(choice < 5){
+    player.candy.gandgs++;
+  } else if(choice < 7){
+    player.candy.himhes++;
+  } else if(choice < 9){
+    player.candy.lollipop++;
+  } else if(choice < 10){
+    player.candy.sugar++;
+  }
+}
+
+function randomMiniGame(){
+  let randomGame = Math.floor(Math.random() * 3);
+  switch(randomGame){
     case 0:
-      player.candy.shittles++;
+      appleBobbing();
       break;
     case 1:
-      player.candy.gandgs++;
+      // toiletPaper();
+      appleBobbing();
+
       break;
     case 2:
-      player.candy.himhes++;
-      break;
-    case 3:
-      player.candy.lollipop++;
-      break;
-    case 4:
-      player.candy.sugar++;
+      candyHand();
       break;
   }
-  console.log("candy");
+}
+
+function miniGameRender(){
+    switch(gameState){
+      case "apple":
+        appleRender();
+        break;
+      case "toilet":
+        appleRender();
+        break;
+      case "hand":
+        handRender();
+        break;
+    }
+}
+
+function mouseClicked(e) {
+  if(gameState === "apple"){
+      apples.forEach(function(e){
+        let xDistance = mouseX - e.x;
+        let yDistance = mouseY - e.y;
+        if(Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2)) < 80 && e.clicks > e.numClicks && appleCountdownNum > 0){
+          console.log("clicks"+e.clicks+"num clicks: "+e.numClicks);
+          e.numClicks++;
+        } else if(e.numClicks >= e.clicks && appleCountdownNum > 0){
+          clearInterval(appleCountdown);
+          winMiniGame();
+        }
+      });
+  }
+  if(gameState === "hand"){
+    let xDistance = mouseX - specialCandy.x;
+    let yDistance = mouseY - specialCandy.y;
+    if(Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2)) < 80 && candyCountdownNum > 0){
+      clearInterval(candyCountdown);
+      winMiniGame();
+    }
+  }
+}
+
+function winMiniGame(){
+  gameState = "walking";
+  giveRandomCandy();
+  alert("You won one candy!");
+}
+
+function loseMiniGame(){
+  gameState = "walking";
+  alert("You lost");
+}
+
+function appleBobbing(){
+  gameState = "apple";
+  appleCountdownNum = 8;
+  apples = [];
+  appleCountdown = setInterval(function(){
+    appleCountdownNum--;
+    if(appleCountdownNum <= 0){
+      clearInterval(appleCountdown);
+      loseMiniGame();
+    }
+  }, 1000);
+  for(let i = 0; i < 5; i++){
+    let xCoordinates = Math.random() * 300 + 800; //(+500)
+    let yCoordinates = Math.random() * 300 + 300;
+    apples.push({x:xCoordinates, y: yCoordinates, clicks: Math.random() * 10 + 20, numClicks: 0});
+  }
+}
+
+function appleRender(){
+  imageMode(CENTER);
+  textSize(50);
+  strokeWeight(1);
+  text("Spam click ONE apple to win. You have "+appleCountdownNum+" seconds", 300, 50);
+  image(bucket, 1000, 500, 1000, 1000);
+  apples.forEach(function(e){
+    image(apple, e.x, e.y, 150, 150);
+  });
+}
+
+
+function toiletPaper(){
+  winMiniGame();
+}
+
+function toiletRender(){
+  alert("win");
+  winMiniGame();
+}
+
+function candyHand(){
+  gameState = "hand";
+  candyCountdownNum = 4;
+  candies = [];
+  candyCountdown = setInterval(function(){
+    candyCountdownNum--;
+    if(candyCountdownNum <= 0){
+      clearInterval(candyCountdown);
+      loseMiniGame();
+    }
+  }, 1000);
+  let xCoordinates = Math.random() * 500 + 800; //(+500)
+  let yCoordinates = Math.random() * 500 + 250;
+  specialCandy = {x:xCoordinates, y: yCoordinates};
+  for(let i = 0; i < 100; i++){
+    let xCoordinates = Math.random() * 500 + 800; //(+500)
+    let yCoordinates = Math.random() * 500 + 250;
+    let randomImageIndex = Math.floor(Math.random() * 5) + 1;
+    candies.push({x:xCoordinates, y: yCoordinates, imgIndex: randomImageIndex});
+  }
+}
+
+function handRender(){
+  imageMode(CENTER);
+  textSize(50);
+  strokeWeight(1);
+  text("Find the candy that doesn't fit in. You have "+candyCountdownNum+" seconds", 300, 50);
+  image(bowl, 1000, 500, 1000, 1000);
+  candies.forEach(function(e){
+    switch(e.imgIndex){
+      case 1:
+        image(candy1, e.x, e.y, 150, 150);
+        break;
+      case 2:
+        image(candy2, e.x, e.y, 150, 150);
+        break;
+      case 3:
+        image(candy3, e.x, e.y, 150, 150);
+        break;
+      case 4:
+        image(candy4, e.x, e.y, 150, 150);
+        break;
+      case 5:
+        image(candy5, e.x, e.y, 150, 150);
+        break;
+    }
+  });
+  image(rainbowcandy, specialCandy.x, specialCandy.y, 150, 150);
 }
 
 function windowResized() {
@@ -354,6 +540,7 @@ function draw() {
   drawHouses();
   drawPlayer();
   drawGUI();
+  miniGameRender();
   checkHouseRange();
 }
 
@@ -364,16 +551,26 @@ function drawGUI(){
   textSize(100);
   strokeWeight(1);
 
-  text(player.candy.gandgs, 10, 100);
-  text(player.candy.himhes, 10, textSizeCandy + 100);
-  text(player.candy.lollipop, 10, textSizeCandy * 2 + 100);
-  text(player.candy.shittles, 10, textSizeCandy * 3 + 100);
-  text(player.candy.sugar, 10, textSizeCandy * 4 + 100);
-  image(gandgs, textSizeCandy, 100, textSizeCandy, textSizeCandy);
-  image(himhes, textSizeCandy, textSizeCandy * 1 + 100, textSizeCandy, textSizeCandy);
-  image(lollipop, textSizeCandy, textSizeCandy * 2 + 100, textSizeCandy, textSizeCandy);
-  image(shittles, textSizeCandy, textSizeCandy * 3 + 100, textSizeCandy, textSizeCandy);
-  image(sugar, textSizeCandy, textSizeCandy * 4 + 100, textSizeCandy, textSizeCandy);
+  if(player.candy.gandgs > 0){
+    text(player.candy.gandgs, 10, 100);
+    image(gandgs, textSizeCandy, 100, textSizeCandy, textSizeCandy);
+  }
+  if(player.candy.himhes > 0){
+    text(player.candy.himhes, 10, textSizeCandy + 100);
+    image(himhes, textSizeCandy, textSizeCandy * 1 + 100, textSizeCandy, textSizeCandy);
+  }
+  if(player.candy.lollipop > 0){
+    text(player.candy.lollipop, 10, textSizeCandy * 2 + 100);
+    image(lollipop, textSizeCandy, textSizeCandy * 2 + 100, textSizeCandy, textSizeCandy);
+  }
+  if(player.candy.shittles > 0){
+    text(player.candy.shittles, 10, textSizeCandy * 3 + 100);
+    image(shittles, textSizeCandy, textSizeCandy * 3 + 100, textSizeCandy, textSizeCandy);
+  }
+  if(player.candy.sugar > 0){
+    text(player.candy.sugar, 10, textSizeCandy * 4 + 100);
+    image(sugar, textSizeCandy, textSizeCandy * 4 + 100, textSizeCandy, textSizeCandy);
+  }
 
 }
 
@@ -407,41 +604,40 @@ function drawPlayer(){
   // console.log("Player Y:"+player.y);
   // console.log("Map X:"+map.realX);
   // console.log("Map Y:"+map.realY);
+  if(gameState === "walking"){
+    if(keys.left){
+      if(!keys.up && !keys.down){
+        player.x -= player.speed;
+      } else if(keys.up && !keys.right) {
+        player.x -= slowSpeed;
+        player.y -= slowSpeed;
+      } else if(keys.down && !keys.right){
+        player.x -= slowSpeed;
+        player.y += slowSpeed;
+      } else if(keys.up && keys.right){
+        player.y -= player.speed;
+      }
+    }
 
-  if(keys.left){
-    if(!keys.up && !keys.down){
-      player.x -= player.speed;
-    } else if(keys.up && !keys.right) {
-      player.x -= slowSpeed;
-      player.y -= slowSpeed;
-    } else if(keys.down && !keys.right){
-      player.x -= slowSpeed;
-      player.y += slowSpeed;
-    } else if(keys.up && keys.right){
+    if(keys.right){
+      if(!keys.up && !keys.down){
+        player.x += player.speed;
+      } else if(keys.up && !keys.left) {
+        player.x += slowSpeed;
+        player.y -= slowSpeed;
+      } else if(keys.down  && !keys.left){
+        player.x += slowSpeed;
+        player.y += slowSpeed;
+      } else if(keys.up && keys.left){
+        player.y += player.speed;
+      }
+    }
+    if(keys.up && !keys.left && !keys.right){
       player.y -= player.speed;
     }
-
-
-  }
-
-  if(keys.right){
-    if(!keys.up && !keys.down){
-      player.x += player.speed;
-    } else if(keys.up && !keys.left) {
-      player.x += slowSpeed;
-      player.y -= slowSpeed;
-    } else if(keys.down  && !keys.left){
-      player.x += slowSpeed;
-      player.y += slowSpeed;
-    } else if(keys.up && keys.left){
+    if(keys.down && !keys.left && !keys.right){
       player.y += player.speed;
     }
-  }
-  if(keys.up && !keys.left && !keys.right){
-    player.y -= player.speed;
-  }
-  if(keys.down && !keys.left && !keys.right){
-    player.y += player.speed;
   }
   checkBorders();
 }
@@ -535,7 +731,7 @@ function drawNature(){
         }
         e.animation = setTimeout(function(){
           setInterval(function(){
-              console.log("interval");
+              // console.log("interval");
               e.currentjackolantern = e.jackolanternState == 0 ? jackolantern1:e.jackolanternState == 1 ?jackolantern2:jackolantern3;
               e.jackolanternState = e.jackolanternState >= 3 ? 0 : e.jackolanternState + 1;
               switch(e.jackolanternState){
