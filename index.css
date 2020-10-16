@@ -4,7 +4,7 @@ html, body, canvas, main{
   overflow: hidden;
   width: 100% !important;
   height: 100% !important;
-  overflow: none;
+  overflow: hidden;
   position: fixed !important;
 }
 
@@ -20,30 +20,63 @@ canvas{
 }
 
 
-#receive-candy{
+#dialogue-box{
   position: fixed;
   z-index: 1;
-  padding: 25px;
+  padding: 0px;
   border-radius: 10px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.8);
   width: 50%;
   height: 50%;
   overflow: auto;
   display: none;
+  position: relative;
+}
+
+.inner{
+  top:50%;
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 70%;
+}
+
+#close{
+  text-align: center;
+}
+
+#message{
+  font-size: 50px;
+}
+
+#subtext{
+  font-size: 30px;
 }
 
 button{
   cursor: pointer;
-  padding: 10px;
+  padding: 16px;
+  font-size: 24px;
   border: 0;
   border-radius: 5px;
-  background-color: orange;
+  background-color: #FF851B;
   transition: background 0.25s, color 0.25s;
+  outline: 0;
+  user-select: none;
 }
 
 button:hover{
-  background-color: rgb(100, 50, 0);
+  background-color: #e16800;
+}
+
+button:active{
+  background-color: #c55b00;
+}
+
+.icon{
+  width: 100px;
+  vertical-align: middle;
 }

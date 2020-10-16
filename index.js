@@ -8,8 +8,8 @@
 
 let gameState = "walking";
 
-const mapWidth = 5000;
-const mapHeight = 5000;
+const mapWidth = 7500;
+const mapHeight = 7500;
 let player = {x: 0, y: 0, realX: 0, realY: 0, width: 200, height: 200, speed: 6, candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}};
 let map = {x: 1000, y: 500, realX: 0, realY: 0, width:mapWidth, height: mapHeight};
 let keys = {up: false, down: false, left: false, right: false};
@@ -74,6 +74,8 @@ let candy3;
 let candy4;
 let candy5;
 let bowl;
+let skull;
+let bone;
 
 // intervals for walking animation
 let animationIntervalLeft;
@@ -83,6 +85,22 @@ let animationIntervalBack;
 let animationjackolantern;
 let houseInRange = false;
 let enterPressed = false;
+
+//Interval for game end
+let gameTime = 0;
+let gameInterval;
+
+//Bone Pong Variables
+let xSpeed;
+let ySpeed;
+let xCoor;
+let yCoor;
+let side;
+let swidth, sheight, paddleX, paddleY, paddleHeight;
+let windowX = 500;
+let windowY = 500;
+let hit = 0;
+
 
 //timer
 // let playerBack = loadImage('sprites/playerback.png');
@@ -136,6 +154,8 @@ function setup() {
   candy5 = loadImage('sprites/candy5.png');
   rainbowcandy = loadImage('sprites/rainbowcandy.png');
   bowl = loadImage('sprites/bowl.png');
+  skull = loadImage('sprites/skull.png');
+  bone = loadImage('sprites/bone.png');
 
 
   //Check if image exists
@@ -239,12 +259,23 @@ function setup() {
     nature.push(newItem);
   }
 
+  gameTime = 300;
+  gameInterval = setInterval(function(){
+    gameTime--;
+    if(gameTime <= 0){
+      let totalCandies = player.candy.shittles + player.candy.gandgs + player.candy.himhes + player.candy.sugar + player.candy.lollipop;
+      dialogueBox("Game over!", function(){}, `You got `+ totalCandies + " candies total!")
+      clearInterval(gameInterval);
+    }
+  }, 1000);
 
   //
 
   // console.log(houses[0].width);
-  candyHand();
-
+  // candyHand();
+  // setTimeout(function(){
+  //   bonePong();
+  // }, 2000);
 }
 
 function keyPressed(){
@@ -342,9 +373,12 @@ function checkHouseRange(){
           e.visited = true;
           let trickOrTreat = Math.floor(Math.random() * 10);
           if(trickOrTreat >= 8){
-            giveRandomCandy();
+            gameState = "won";
+            dialogueBox("You got one "+giveRandomCandy()+"!", function(){
+              gameState = "walking";
+            });
           } else {
-            alert("Trick!");
+            // alert("Trick!");
             randomMiniGame();
           }
         }
@@ -359,14 +393,19 @@ function giveRandomCandy(){
   //candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}
   if(choice < 3){
     player.candy.shittles++;
+    return `<img class="icon" src="sprites/shittles.png">`;
   } else if(choice < 5){
     player.candy.gandgs++;
+    return `<img class="icon" src="sprites/gandgs.png">`;
   } else if(choice < 7){
     player.candy.himhes++;
+    return `<img class="icon" src="sprites/himhes.png">`;
   } else if(choice < 9){
     player.candy.lollipop++;
+    return `<img class="icon" src="sprites/lollipop.png">`;
   } else if(choice < 10){
     player.candy.sugar++;
+    return `<img class="icon" src="sprites/sugar.png">`;
   }
 }
 
@@ -378,7 +417,7 @@ function randomMiniGame(){
       break;
     case 1:
       // toiletPaper();
-      appleBobbing();
+      bonePong();
 
       break;
     case 2:
@@ -392,8 +431,8 @@ function miniGameRender(){
       case "apple":
         appleRender();
         break;
-      case "toilet":
-        appleRender();
+      case "pong":
+        bonePongRender();
         break;
       case "hand":
         handRender();
@@ -426,14 +465,17 @@ function mouseClicked(e) {
 }
 
 function winMiniGame(){
-  gameState = "walking";
-  giveRandomCandy();
-  alert("You won one candy!");
+  gameState = "wonminigame";
+  dialogueBox("You won one "+giveRandomCandy()+"!", function(){
+    gameState = "walking";
+  });
 }
 
 function loseMiniGame(){
-  gameState = "walking";
-  alert("You lost");
+  gameState = "lostminigame";
+  dialogueBox("You lost the mini game", function(){
+    gameState = "walking";
+  });
 }
 
 function appleBobbing(){
@@ -465,14 +507,84 @@ function appleRender(){
   });
 }
 
+function bonePong(){
+  gameState = "pong";
+  fill(0);
+  rect(1000,500,windowX,windowY);
+  xCoor = 1800
+  yCoor = Math.random() * 800 + 100;
+  side = 100;
+  xSpeed = -25;
+  ySpeed = 10;
 
-function toiletPaper(){
-  winMiniGame();
+  paddleX = 50;
+  paddleY = 0.5*sheight;
+  paddleHeight = 200;
+  swidth = 0.7* windowX;
+  sheight = 0.7*windowY;
+  hit = 0;
+
 }
 
-function toiletRender(){
-  alert("win");
-  winMiniGame();
+function displayEllipse(){
+  // fill(255);
+  image(skull, xCoor,yCoor,side,side);
+}
+
+function moveEllipse(){
+  if(yCoor <= height){
+    yCoor += ySpeed;
+  }
+  if(xCoor <= width){
+    xCoor += xSpeed;
+  }
+}
+
+function bounceEllipse(){
+   if(yCoor >= height - side/2 || yCoor <= side/2){
+      ySpeed *= -1;
+      }
+   if(xCoor >= width - side/2 || (xCoor <= side/2 + paddleX) && ((yCoor <= paddleY + paddleHeight/2 )&& (yCoor >= paddleY - paddleHeight/2))){
+    xSpeed *= -1;
+   }
+   if(xCoor + side/2 <= 0){
+     ySpeed = 0;
+     xSpeed = 0;
+     paddleY = 100000;
+     paddleX = 100000;
+     loseMiniGame();
+   }
+   console.log("skull: "+(xCoor + side/2));
+   console.log("paddle: "+(paddleX + side/2));
+   if(xCoor + side/2 == 150){
+     console.log("hit");
+     hit++;
+     if(hit >= 5){
+       winMiniGame();
+       // console.log("bruh");
+       hit = 0;
+     } else {
+       console.log("num hits: "+hit)
+     }
+   }
+}
+
+
+function bonePongRender(){
+  background(0);
+  displayEllipse();
+  moveEllipse();
+  bounceEllipse();
+  textSize(50);
+  strokeWeight(1);
+  text("Hit the ball 5 times to win. Hits: "+hit, 750, 50);
+  fill(150,0,250);
+  if((mouseY-paddleHeight/2 >= 0) && (mouseY + paddleHeight/2) <= height){
+    paddleY = mouseY;
+  }
+  imageMode(CENTER);
+  image(bone, paddleX,paddleY, 50, paddleHeight);
+
 }
 
 function candyHand(){
@@ -571,6 +683,10 @@ function drawGUI(){
     text(player.candy.sugar, 10, textSizeCandy * 4 + 100);
     image(sugar, textSizeCandy, textSizeCandy * 4 + 100, textSizeCandy, textSizeCandy);
   }
+
+  let minutes = Math.floor(gameTime / 60);
+  let seconds = gameTime % 60;
+  text(minutes+":"+("0" + seconds).slice(-2), 900, 985);
 
 }
 
@@ -706,13 +822,13 @@ function drawNature(){
     } else if(e.imgIndex < 60){
       image(gravestone2, (e.realX - player.x), (e.realY - player.y), 200, 100);
     } else if(e.imgIndex < 65){
-      image(leaf1, (e.realX - player.x), (e.realY - player.y), 300, 200);
+      image(leaf1, (e.realX - player.x), (e.realY - player.y), 200, 100);
     } else if(e.imgIndex < 70){
-      image(leaf2, (e.realX - player.x), (e.realY - player.y), 300, 200);
+      image(leaf2, (e.realX - player.x), (e.realY - player.y), 200, 100);
     } else if(e.imgIndex < 75){
-      image(leaf3, (e.realX - player.x), (e.realY - player.y), 300, 200);
+      image(leaf3, (e.realX - player.x), (e.realY - player.y), 200, 100);
     } else if(e.imgIndex < 80){
-      image(leaf4, (e.realX - player.x), (e.realY - player.y), 300, 200);
+      image(leaf4, (e.realX - player.x), (e.realY - player.y), 200, 100);
     } else if(e.imgIndex < 85){
       if(e.init){
         image(jackolantern1, (e.realX - player.x), (e.realY - player.y), 200, 100);
@@ -757,5 +873,23 @@ function drawNature(){
       image(grass, (e.realX - player.x), (e.realY - player.y), 200, 100);
     }
     // rect(e.realX - player.x, e.realY - player.y, e.width, e.height);
+  });
+}
+
+function dialogueBox(text, onClose = function(){}, subtext=""){
+  $("#message").html(text);
+  $("#subtext").text(subtext);
+  $("#dialogue-box").show("slow");
+  $("#close").on("click", function(){
+    onClose();
+    $("#dialogue-box").hide("slow");
+    $(this).off("click").off("keypress");
+  });
+  $(document).on("keypress", function(e){
+    if((e.keyCode === 13 || e.keyCode === 27) && !$("#dialogue-box").is(":hidden")){
+      onClose();
+      $("#dialogue-box").hide("slow");
+      $(this).off("click").off("keypress");
+    }
   });
 }
