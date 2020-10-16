@@ -5,8 +5,8 @@
 
 // let bg = ;
 //Declares Variable
-const mapWidth = 4000;
-const mapHeight = 4000;
+const mapWidth = 5000;
+const mapHeight = 5000;
 let player = {x: 0, y: 0, realX: 0, realY: 0, width: 200, height: 200, speed: 20, candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}};
 let map = {x: 1000, y: 500, realX: 0, realY: 0, width:mapWidth, height: mapHeight};
 let keys = {up: false, down: false, left: false, right: false};
@@ -33,6 +33,7 @@ let houses = [];
 // nature shit
 let tree1;
 let tree2;
+let trees = [];
 let grass;
 let rock;
 let leaf1;
@@ -40,14 +41,30 @@ let leaf2;
 let leaf3;
 let leaf4;
 let nature = [];
+let gravestone1;
+let gravestone2;
+let jackolantern1;
+let jackolantern2;
+let jackolantern3;
+// let currentjackolantern;
+
+//candy
+let lollipop;
+let gandgs;
+let shittles;
+let sugar;
+let himhes;
 
 // intervals for walking animation
 let animationIntervalLeft;
 let animationIntervalRight;
 let animationIntervalFront;
 let animationIntervalBack;
+let animationjackolantern;
 let houseInRange = false;
 let enterPressed = false;
+
+//timer
 // let playerBack = loadImage('sprites/playerback.png');
 // let playerFrontWalking = loadImage('sprites/playerfrontWalking.png');
 
@@ -70,6 +87,25 @@ function setup() {
   house1 = loadImage('sprites/house1.png');
   house2 = loadImage('sprites/house2.png');
   house3 = loadImage('sprites/house3.png');
+  // let lollipop;
+  // let gandgs;
+  // let shittles;
+  // let sugar;
+  // let himhes;
+  lollipop = loadImage('sprites/lollipop.png');
+  gandgs = loadImage('sprites/gandgs.png');
+  shittles = loadImage('sprites/shittles.png');
+  sugar = loadImage('sprites/sugar.png');
+  himhes = loadImage('sprites/himhes.png');
+  gravestone1 = loadImage('sprites/gravestone1.png');
+  gravestone2 = loadImage('sprites/gravestone2.png');
+  leaf1 = loadImage('sprites/leaf1.png');
+  leaf2 = loadImage('sprites/leaf2.png');
+  leaf3 = loadImage('sprites/leaf3.png');
+  leaf4 = loadImage('sprites/leaf4.png');
+  jackolantern1 = loadImage('sprites/jackolantern1.png');
+  jackolantern2 = loadImage('sprites/jackolantern2.png');
+  jackolantern3 = loadImage('sprites/jackolantern3.png');
 
   //Check if image exists
   let houseNumber = 1;
@@ -82,7 +118,7 @@ function setup() {
 
   //Generate Houses
   // let houseSize;
-  for(let i = 0; i < 1; i++){
+  for(let i = 0; i < 20; i++){
     let houseSize = 400;
     let inRange = false;
 
@@ -114,17 +150,64 @@ function setup() {
       });
     }while(inRange);
 
-    let newHouse = {realX: xCoordinates, realY: yCoordinates, width: houseSize, height: houseSize, imgIndex: Math.floor(Math.random()*3), visited: false};
+    let newHouse = {realX: xCoordinates, realY: yCoordinates, width: houseSize, height: houseSize, imgIndex: Math.floor(Math.random()*3), visited: false, animation: null};
     houses.push(newHouse);
   }
 
-  for(let i = 0; i < 100; i++){
+  // for(let i = 0; i < 20; i++){
+  //   let xCoordinates = map.x + Math.random() * (map.width - 600) + 300;
+  //   let yCoordinates = map.y + Math.random() * (map.height - 600) + 300;
+  //   let type = Math.floor(Math.random() * 100);
+  //   let newItem = {realX: xCoordinates, realY: yCoordinates, width: 200, height: 200, imgIndex: type};
+  //   nature.push(newItem);
+  // }
+
+  //Generate Treeees
+  for(let i = 0; i < 15; i++){
+    let treeSize = 300;
+    let inRange = false;
+
+    let xCoordinates;
+    let yCoordinates;
+
+    do{
+      xCoordinates = map.x + Math.random() * (map.width - treeSize * 2) + treeSize;
+      yCoordinates = map.y + Math.random() * (map.height - treeSize * 2) + treeSize;
+
+      let tempXmin = 0;
+      let tempYmin = 0;
+      let tempXmax = 0;
+      let tempYmax = 0;
+
+      inRange = false;
+      trees.forEach(function(e){
+        tempXmin = e.realX - 500;
+        tempXmax = e.realX + 500;
+        tempYmin = e.realY - 500;
+        tempYmax = e.realY + 500;
+        // console.log(""+)
+        if(xCoordinates > tempXmin && yCoordinates > tempYmin && xCoordinates < tempXmax && yCoordinates < tempYmax){
+          inRange = true;
+          // console.log("in range");
+        } else {
+          // console.log("x:" + xCoordinates+", y:" + yCoordinates);
+          // console.log("tempx:" + tempXmin+", tempy:" + tempYmin);
+        }
+      });
+    }while(inRange);
+
+    let newTree = {realX: xCoordinates, realY: yCoordinates, width: treeSize, height: treeSize, imgIndex: Math.floor(Math.random()*100)};
+    trees.push(newTree);
+  }
+
+  for(let i = 0; i < 300; i++){
     let xCoordinates = map.x + Math.random() * (map.width - 600) + 300;
     let yCoordinates = map.y + Math.random() * (map.height - 600) + 300;
     let type = Math.floor(Math.random() * 100);
-    let newItem = {realX: xCoordinates, realY: yCoordinates, width: 200, height: 200, imgIndex: type};
+    let newItem = {realX: xCoordinates, realY: yCoordinates, width: 200, height: 200, imgIndex: type, init: true};
     nature.push(newItem);
   }
+
 
   //
 
@@ -172,7 +255,9 @@ function keyPressed(){
       }, 200);
       break;
     case 13:
-
+      if(houseInRange){
+        enterPressed = true;
+      }
       break;
   }
 }
@@ -204,9 +289,7 @@ function keyReleased(){
       currentPlayer = playerFront;
       break;
     case 13:
-      if(houseInRange){
-        enterPressed = true;
-      }
+      enterPressed = false;
       break;
   }
 }
@@ -247,7 +330,7 @@ function giveRandomCandy(){
       player.candy.himhes++;
       break;
     case 3:
-      player.candy.lolipop++;
+      player.candy.lollipop++;
       break;
     case 4:
       player.candy.sugar++;
@@ -261,11 +344,13 @@ function windowResized() {
 }
 
 function draw() {
+
   imageMode(CENTER);
   rectMode(CENTER);
   background(color(29, 17, 69));
   drawMap();
   drawNature();
+  drawTrees();
   drawHouses();
   drawPlayer();
   drawGUI();
@@ -273,17 +358,31 @@ function draw() {
 }
 
 function drawGUI(){
-  textSize(30);
   // textStroke(5);
-  strokeWeight(1);
   // text('Press [Enter] to interact', 0, 30);
+  let textSizeCandy = 200;
+  textSize(100);
+  strokeWeight(1);
+
+  text(player.candy.gandgs, 10, 100);
+  text(player.candy.himhes, 10, textSizeCandy + 100);
+  text(player.candy.lollipop, 10, textSizeCandy * 2 + 100);
+  text(player.candy.shittles, 10, textSizeCandy * 3 + 100);
+  text(player.candy.sugar, 10, textSizeCandy * 4 + 100);
+  image(gandgs, textSizeCandy, 100, textSizeCandy, textSizeCandy);
+  image(himhes, textSizeCandy, textSizeCandy * 1 + 100, textSizeCandy, textSizeCandy);
+  image(lollipop, textSizeCandy, textSizeCandy * 2 + 100, textSizeCandy, textSizeCandy);
+  image(shittles, textSizeCandy, textSizeCandy * 3 + 100, textSizeCandy, textSizeCandy);
+  image(sugar, textSizeCandy, textSizeCandy * 4 + 100, textSizeCandy, textSizeCandy);
+
 }
 
 function drawMap(){
   rectMode(CORNER);
   noFill();
-  stroke(0);
-  strokeWeight(5);
+  //29, 17, 69
+  stroke(20, 20, 50);
+  strokeWeight(2);
   map.realX =  width/2 - player.x;
   map.realY =  height/2 - player.y;
   rect(map.realX, map.realY, map.width, map.height);
@@ -382,19 +481,84 @@ function drawHouses(){
   });
 }
 
+function drawTrees(){
+  trees.forEach(function(e){
+    if(e.imgIndex <= 50){
+      image(tree1, (e.realX - player.x), (e.realY - player.y), 500, 500);
+    } else if(e.imgIndex <= 100){
+      image(tree2, (e.realX - player.x), (e.realY - player.y), 500, 500);
+    }
+  });
+}
+
 function drawNature(){
   nature.forEach(function(e){
     fill(100);
     stroke(100);
 
-    if(e.imgIndex <= 5){
-      image(tree1, (e.realX - player.x), (e.realY - player.y), 500, 500);
-    } else if(e.imgIndex <= 10){
-      image(tree2, (e.realX - player.x), (e.realY - player.y), 500, 500);
-    } else if(e.imgIndex <= 60){
+    // if(e.imgIndex <= 5){
+    //   image(tree1, (e.realX - player.x), (e.realY - player.y), 500, 500);
+    // } else if(e.imgIndex <= 10){
+    //   image(tree2, (e.realX - player.x), (e.realY - player.y), 500, 500);
+    // } else
+    if(e.imgIndex < 40){
       image(grass, (e.realX - player.x), (e.realY - player.y), 200, 100);
-    } else if(e.imgIndex <= 100){
+    } else if(e.imgIndex < 50){
       image(rock, (e.realX - player.x), (e.realY - player.y), 300, 200);
+    } else if(e.imgIndex < 55){
+      image(gravestone1, (e.realX - player.x), (e.realY - player.y), 200, 100);
+    } else if(e.imgIndex < 60){
+      image(gravestone2, (e.realX - player.x), (e.realY - player.y), 200, 100);
+    } else if(e.imgIndex < 65){
+      image(leaf1, (e.realX - player.x), (e.realY - player.y), 300, 200);
+    } else if(e.imgIndex < 70){
+      image(leaf2, (e.realX - player.x), (e.realY - player.y), 300, 200);
+    } else if(e.imgIndex < 75){
+      image(leaf3, (e.realX - player.x), (e.realY - player.y), 300, 200);
+    } else if(e.imgIndex < 80){
+      image(leaf4, (e.realX - player.x), (e.realY - player.y), 300, 200);
+    } else if(e.imgIndex < 85){
+      if(e.init){
+        image(jackolantern1, (e.realX - player.x), (e.realY - player.y), 200, 100);
+        e.randomTime = Math.random() * 500 + 200;
+        e.jackolanternState = Math.floor(Math.random() * 3);
+        switch(e.jackolanternState){
+          case 0:
+            e.currentjackolantern = jackolantern1;
+            break;
+          case 1:
+            e.currentjackolantern = jackolantern2;
+            break;
+          case 2:
+            e.currentjackolantern = jackolantern3;
+            break;
+        }
+        e.animation = setTimeout(function(){
+          setInterval(function(){
+              console.log("interval");
+              e.currentjackolantern = e.jackolanternState == 0 ? jackolantern1:e.jackolanternState == 1 ?jackolantern2:jackolantern3;
+              e.jackolanternState = e.jackolanternState >= 3 ? 0 : e.jackolanternState + 1;
+              switch(e.jackolanternState){
+                case 0:
+                  e.currentjackolantern = jackolantern1;
+                  break;
+                case 1:
+                  e.currentjackolantern = jackolantern2;
+                  break;
+                case 2:
+                  e.currentjackolantern = jackolantern3;
+                  break;
+              }
+              e.randomTime = Math.random() * 500 + 200;
+          }, e.randomTime);
+        }, 500);
+        e.init = false;
+      } else {
+        image(e.currentjackolantern, (e.realX - player.x), (e.realY - player.y), 200, 100);
+      }
+
+    } else if(e.imgIndex < 100){
+      image(grass, (e.realX - player.x), (e.realY - player.y), 200, 100);
     }
     // rect(e.realX - player.x, e.realY - player.y, e.width, e.height);
   });
