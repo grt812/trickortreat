@@ -10,7 +10,7 @@ let gameState = "walking";
 
 const mapWidth = 7500;
 const mapHeight = 7500;
-let player = {x: 0, y: 0, realX: 0, realY: 0, width: 200, height: 200, speed: 6, candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}};
+let player = {x: mapWidth/2, y: mapHeight/2, realX: 0, realY: 0, width: 200, height: 200, speed: 6, candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}};
 let map = {x: 1000, y: 500, realX: 0, realY: 0, width:mapWidth, height: mapHeight};
 let keys = {up: false, down: false, left: false, right: false};
 let horizontalBorders = [{x: 0, y1: 0, y2: map.height}, {x: map.width, y1: 0, y2: map.height}];
@@ -43,6 +43,7 @@ let leaf1;
 let leaf2;
 let leaf3;
 let leaf4;
+let shrub;
 let nature = [];
 let gravestone1;
 let gravestone2;
@@ -101,6 +102,13 @@ let windowX = 500;
 let windowY = 500;
 let hit = 0;
 
+//Enemies
+let enemy1;
+let enemy2;
+let enemy3;
+let enemies = [];
+
+
 
 //timer
 // let playerBack = loadImage('sprites/playerback.png');
@@ -156,6 +164,13 @@ function setup() {
   bowl = loadImage('sprites/bowl.png');
   skull = loadImage('sprites/skull.png');
   bone = loadImage('sprites/bone.png');
+
+  enemy1 = loadImage('sprites/cat.png');
+  enemy2 = loadImage('sprites/evilpumpkin.png');
+  enemy3 = loadImage('sprites/zombie.png');
+
+  shrub = loadImage('sprites/ericstree.png');
+
 
 
   //Check if image exists
@@ -257,6 +272,24 @@ function setup() {
     let type = Math.floor(Math.random() * 100);
     let newItem = {realX: xCoordinates, realY: yCoordinates, width: 200, height: 200, imgIndex: type, init: true};
     nature.push(newItem);
+  }
+
+  //Setup Enemies
+
+  for(let i = 0; i < 30; i++){
+    let enemyX = map.x + Math.random() * (map.width - 600) + 300;
+    let enemyY = map.y + Math.random() * (map.height - 600) + 300;
+    // let enemyX = map.width/2;
+    // let enemyY = map.height/2;
+    let enemySpeedX = Math.random() * 11 - 5;
+    let enemySpeedY = Math.random() * 11 - 5;
+    // let enemySpeedX = 0;
+    // let enemySpeedY = 0;
+
+    let imageIndex = Math.floor(Math.random() * 3);
+    let newEnemy = {realX: enemyX, realY: enemyY, width:250, height: 250, speedX: enemySpeedX, speedY: enemySpeedY, imgIndex: imageIndex, hidden: false};
+    // console.log(JSON.stringify(newEnemy));
+    enemies.push(newEnemy);
   }
 
   gameTime = 300;
@@ -406,6 +439,28 @@ function giveRandomCandy(){
   } else if(choice < 10){
     player.candy.sugar++;
     return `<img class="icon" src="sprites/sugar.png">`;
+  }
+}
+
+function loseRandomCandy(){
+  let choice = Math.floor(Math.random() * 10);
+  if(choice < 3 && player.candy.shittles > 0){
+    player.candy.shittles--;
+    return `You lost one <img class="icon" src="sprites/shittles.png"> to a monster!`;
+  } else if(choice < 5 && player.candy.gandgs > 0){
+    player.candy.gandgs--;
+    return `You lost one <img class="icon" src="sprites/gandgs.png"> to a monster!`;
+  } else if(choice < 7 && player.candy.himhes > 0){
+    player.candy.himhes--;
+    return `You lost one <img class="icon" src="sprites/himhes.png"> to a monster!`;
+  } else if(choice < 9 && player.candy.lollipop > 0){
+    player.candy.lollipop--;
+    return `You lost one <img class="icon" src="sprites/lollipop.png"> to a monster!`;
+  } else if(choice < 10 && player.candy.sugar > 0){
+    player.candy.sugar--;
+    return `You lost one <img class="icon" src="sprites/sugar.png"> to a monster!`;
+  } else {
+    return "You got tripped by a monster!"
   }
 }
 
@@ -641,6 +696,55 @@ function windowResized() {
   // resizeCanvas(windowWidth, windowHeight);
 }
 
+function drawEnemies(){
+  // fill(0);
+  // rect(, 0, 200, 200);
+  enemies.forEach(function(e){
+    // fill(0);
+    // rect(e.realX - player.x, e.realY - player.y, e.width, e.height);
+    if(!e.hidden && gameState === "walking"){
+      if(e.imgIndex === 0){
+        image(enemy1, e.realX - player.x , e.realY - player.y, e.width, e.height);
+      } else if(e.imgIndex === 1){
+        image(enemy2, e.realX - player.x , e.realY - player.y , e.width, e.height);
+      } else if(e.imgIndex === 2){
+        image(enemy3, e.realX - player.x,  e.realY - player.y, e.width, e.height);
+      }
+      //move enemy
+      if(gameState == "walking"){
+        e.realX += e.speedX;
+        e.realY += e.speedY;
+      }
+
+      if(e.realX < 1000){
+        e.speedX *= -1;
+      } else if(e.realX > map.width + 1000){
+        e.speedX *= -1;
+      } else {
+        console.log("coordinates:"+e.realX+","+e.realY);
+      }
+
+      if(e.realY < 500){
+        e.speedY *= -1;
+      } else if(e.realY > map.height + 500){
+        e.speedY *= -1;
+      } else {
+        console.log("coordinates:"+e.realX+","+e.realY);
+      }
+      let xDistance = e.realX - player.x - 1000;
+      let yDistance = e.realY - player.y - 500;
+      // fill(500);
+      // rect(xDistance, yDistance, 500 , 500);
+      if(Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2)) < 100){
+        dialogueBox("Uh oh!", function(){}, loseRandomCandy());
+        e.hidden = true;
+      }
+    }
+
+  });
+  //
+}
+
 function draw() {
 
   imageMode(CENTER);
@@ -651,6 +755,7 @@ function draw() {
   drawTrees();
   drawHouses();
   drawPlayer();
+  drawEnemies();
   drawGUI();
   miniGameRender();
   checkHouseRange();
@@ -663,29 +768,30 @@ function drawGUI(){
   textSize(100);
   strokeWeight(1);
 
-  if(player.candy.gandgs > 0){
+  if(player.candy.gandgs !== 0){
     text(player.candy.gandgs, 10, 100);
     image(gandgs, textSizeCandy, 100, textSizeCandy, textSizeCandy);
   }
-  if(player.candy.himhes > 0){
+  if(player.candy.himhes !== 0){
     text(player.candy.himhes, 10, textSizeCandy + 100);
     image(himhes, textSizeCandy, textSizeCandy * 1 + 100, textSizeCandy, textSizeCandy);
   }
-  if(player.candy.lollipop > 0){
+  if(player.candy.lollipop !== 0){
     text(player.candy.lollipop, 10, textSizeCandy * 2 + 100);
     image(lollipop, textSizeCandy, textSizeCandy * 2 + 100, textSizeCandy, textSizeCandy);
   }
-  if(player.candy.shittles > 0){
+  if(player.candy.shittles !== 0){
     text(player.candy.shittles, 10, textSizeCandy * 3 + 100);
     image(shittles, textSizeCandy, textSizeCandy * 3 + 100, textSizeCandy, textSizeCandy);
   }
-  if(player.candy.sugar > 0){
+  if(player.candy.sugar !== 0){
     text(player.candy.sugar, 10, textSizeCandy * 4 + 100);
     image(sugar, textSizeCandy, textSizeCandy * 4 + 100, textSizeCandy, textSizeCandy);
   }
 
   let minutes = Math.floor(gameTime / 60);
   let seconds = gameTime % 60;
+  fill(255)
   text(minutes+":"+("0" + seconds).slice(-2), 900, 985);
 
 }
@@ -869,6 +975,8 @@ function drawNature(){
         image(e.currentjackolantern, (e.realX - player.x), (e.realY - player.y), 200, 100);
       }
 
+    } else if(e.imgIndex < 95){
+      image(shrub, (e.realX - player.x), (e.realY - player.y), 200, 100);
     } else if(e.imgIndex < 100){
       image(grass, (e.realX - player.x), (e.realY - player.y), 200, 100);
     }
@@ -878,7 +986,7 @@ function drawNature(){
 
 function dialogueBox(text, onClose = function(){}, subtext=""){
   $("#message").html(text);
-  $("#subtext").text(subtext);
+  $("#subtext").html(subtext);
   $("#dialogue-box").show("slow");
   $("#close").on("click", function(){
     onClose();
