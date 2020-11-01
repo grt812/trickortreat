@@ -140,7 +140,7 @@ function setup() {
   // let himhes;
   lollipop = loadImage('sprites/lollipop.png');
   gandgs = loadImage('sprites/gandgs.png');
-  shittles = loadImage('sprites/shittles.png');
+  shittles = loadImage('sprites/spittles.png');
   sugar = loadImage('sprites/sugar.png');
   himhes = loadImage('sprites/himhes.png');
   gravestone1 = loadImage('sprites/gravestone1.png');
