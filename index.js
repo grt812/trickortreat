@@ -140,7 +140,7 @@ function setup() {
   // let himhes;
   lollipop = loadImage('sprites/lollipop.png');
   gandgs = loadImage('sprites/gandgs.png');
-  shittles = loadImage('sprites/spittles.png');
+  shittles = loadImage('sprites/skattles.png');
   sugar = loadImage('sprites/sugar.png');
   himhes = loadImage('sprites/himhes.png');
   gravestone1 = loadImage('sprites/gravestone1.png');
@@ -427,7 +427,7 @@ function giveRandomCandy(){
   //candy: {shittles: 0, gandgs: 0, himhes: 0, lollipop: 0, sugar: 0}
   if(choice < 3){
     player.candy.shittles++;
-    return `<img class="icon" src="sprites/shittles.png">`;
+    return `<img class="icon" src="sprites/skattles.png">`;
   } else if(choice < 5){
     player.candy.gandgs++;
     return `<img class="icon" src="sprites/gandgs.png">`;
